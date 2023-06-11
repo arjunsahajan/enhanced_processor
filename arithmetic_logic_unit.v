@@ -2,18 +2,26 @@ module arithmetic_logic_unit
 #(parameter n = 8)
 (
 	input [n - 1: 0] x, y,
-	input cin, add_sub_control,
+	input cin, 
+	input add_sub_control,
+	input [1: 0] op,
 	
-	output [n - 1: 0] sum,
-	output cout,
-	output over_flow
+	output [n - 1: 0] alu_out,
+	output cout
 );
+	
+	parameter ADD_SUB = 2'b00;
+	parameter LOGICAL_AND = 2'b01;
 
+	wire [n - 1: 0] sum;
+	wire [n - 1: 0] logical_and;
+	wire [n - 1: 0] y_xor;
 	wire [n: 0] c;
+	
+	reg [n: 0] alu_out_reg;
+	
 	assign c[0] = cin;
 	assign cout = c[n];
-	
-	wire [n - 1: 0] y_xor;
 	
 	generate
 	
@@ -42,7 +50,24 @@ module arithmetic_logic_unit
 		
 	endgenerate
 	
-	assign over_flow = cout ^ c[7];
+	assign logical_and = x & y;
+	
+	always @(op)
+	begin
+		case(op)
+			ADD_SUB: 
+			begin
+				alu_out_reg <= sum;
+			end
+			
+			LOGICAL_AND:
+			begin
+				alu_out_reg <= logical_and;
+			end
+		endcase
+	end
+	
+	assign alu_out = alu_out_reg;
 	
 endmodule 
 

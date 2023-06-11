@@ -5,12 +5,16 @@ module control_unit_fsm
 	input reset_n,
 	input [15: 0] IR_out,
 
+	output reg [1: 0] op,
 	output reg add_sub_ctrl,
 	output reg [3: 0] sel,
 	output reg IR_in, G_in, A_in,
 	output reg [7: 0] RX_in,
 	output reg done
 );
+	
+	parameter ADD_SUB = 2'b00;
+	parameter LOGICAL_AND = 2'b01;
 
 	parameter T0 = 3'b000;
 	parameter T1 = 3'b001;
@@ -22,6 +26,7 @@ module control_unit_fsm
 	parameter MVT = 3'b001;
 	parameter ADD = 3'b010;
 	parameter SUB = 3'b011;
+	parameter AND = 3'b110;
 	
 	reg [2: 0] state, nxt_state;
 		
@@ -73,17 +78,11 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					ADD:
+					ADD, SUB, AND:
 					begin
 						sel <= RX;
 						A_in <= 1'b0;
-					end
-					
-					SUB:
-					begin
-						sel <= RX;
-						A_in <= 1'b0;
-					end
+					end			
 				endcase
 				
 				nxt_state <= T2;
@@ -119,6 +118,18 @@ module control_unit_fsm
 						
 						add_sub_ctrl <= 1'b1;
 					end
+					
+					AND:
+					begin
+						if(imm_flag)
+						begin
+							sel <= 4'b1000;
+						end
+						else
+						begin
+							sel <= RY;
+						end
+					end
 				endcase
 			
 				G_in <= 1'b0;
@@ -128,18 +139,20 @@ module control_unit_fsm
 			T3: // T3 clock cycle
 			begin
 				case(inst)
-					ADD:
+					ADD, SUB:
 					begin
 						sel <= 4'b1001;
 						RX_in[RX] <= 1'b0;
+						op <= ADD_SUB;
 						
 						done <= 1'b1;
 					end
 					
-					SUB:
+					AND:
 					begin
 						sel <= 4'b1001;
 						RX_in[RX] <= 1'b0;
+						op <= LOGICAL_AND;
 						
 						done <= 1'b1;
 					end

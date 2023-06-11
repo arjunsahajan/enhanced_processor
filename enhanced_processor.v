@@ -7,13 +7,15 @@ module enhanced_processor
 	
 	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out,
 	output [15: 0] mux_out,
-	output [15: 0] sum,
+	output [15: 0] alu_out,
+	output cout,
 	output [3: 0] sel,
 	output IR_in, G_in, A_in, PC_in,
 	output [7: 0] RX_in,
 	output [4: 0] addr,
 	output [15: 0] DIN,
 	output pc_incr,
+	output [1: 0] op,
 	output done
 );
 	
@@ -52,6 +54,7 @@ module enhanced_processor
 		.reset_n(reset_n),
 		
 		.add_sub_ctrl(add_sub_ctrl),
+		.op(op),
 		.sel(sel),
 		.IR_in(IR_in),
 		.G_in(G_in), 
@@ -135,17 +138,17 @@ module enhanced_processor
 	(
 		.clk(pc_incr),
 		.D(mux_out),
-		.load(RX_in[7]),
+		.load(PC_in),
 		.reset_n(reset_n),
 		
-		.Q(R7_out)
+		.Q(PC_out)
 	);
 	
 	// Output register
 	regn #(.N(16)) G
 	(
 		.clk(clk_50MHz),
-		.D(sum),
+		.D(alu_out),
 		.load(G_in),
 		.clear(reset_n),
 		
@@ -157,10 +160,10 @@ module enhanced_processor
 	(
 		.clk(clk_50MHz),
 		.D(mux_out),
-		.load(PC_in),
+		.load(A_in),
 		.clear(reset_n),
 		
-		.Q(PC_out)
+		.Q(A_out)
 	);
 	
 	mux MX
@@ -180,14 +183,16 @@ module enhanced_processor
 		.mux_out(mux_out)
 	);
 	
-	rca_nbit #(.n(16)) RCA
+	arithmetic_logic_unit #(.n(16)) ALU
 	(
 		.x(A_out), 
 		.y(mux_out), 
 		.cin(add_sub_ctrl), 
-		.add_sub_control(add_sub_ctrl), 
+		.add_sub_control(add_sub_ctrl),
+		.op(op),
 		
-		.sum(sum)
+		.alu_out(alu_out),
+		.cout(cout)
 	);
 	
 endmodule
