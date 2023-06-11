@@ -1,0 +1,12 @@
+db/
+incremental_db/
+output_files/
+simulation/
+greybox_tmp/
+*.qsf
+*.bak
+*.qpf
+*.wlf
+*.qip
+*.rpt
+inst_mem_bb.v
