@@ -18,7 +18,7 @@ module arithmetic_logic_unit
 	wire [n - 1: 0] y_xor;
 	wire [n: 0] c;
 	
-	reg [n: 0] alu_out_reg;
+	reg [n - 1: 0] alu_out_reg;
 	
 	assign c[0] = cin;
 	assign cout = c[n];
