@@ -78,11 +78,23 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					ADD, SUB, AND:
+					ADD:
 					begin
 						sel <= RX;
 						A_in <= 1'b0;
-					end			
+					end
+					
+					SUB:
+					begin
+						sel <= RX;
+						A_in <= 1'b0;
+					end
+		
+					AND:
+					begin
+						sel <= RX;
+						A_in <= 1'b0;
+					end
 				endcase
 				
 				nxt_state <= T2;
@@ -139,11 +151,18 @@ module control_unit_fsm
 			T3: // T3 clock cycle
 			begin
 				case(inst)
-					ADD, SUB:
+					ADD:
 					begin
 						sel <= 4'b1001;
 						RX_in[RX] <= 1'b0;
-						op <= ADD_SUB;
+						
+						done <= 1'b1;
+					end
+					
+					SUB:
+					begin
+						sel <= 4'b1001;
+						RX_in[RX] <= 1'b0;
 						
 						done <= 1'b1;
 					end
