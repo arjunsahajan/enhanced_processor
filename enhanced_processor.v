@@ -1,18 +1,19 @@
-module simple_processor
+module enhanced_processor
 (
 	input clk_50MHz,
 	input clk_addr,
 	input run,
 	input reset_n,
 	
-	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, R7_out, G_out, A_out,
+	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out,
 	output [15: 0] mux_out,
 	output [15: 0] sum,
 	output [3: 0] sel,
-	output IR_in, G_in, A_in,
+	output IR_in, G_in, A_in, PC_in,
 	output [7: 0] RX_in,
 	output [4: 0] addr,
 	output [15: 0] DIN,
+	output pc_incr,
 	output done
 );
 	
@@ -130,12 +131,12 @@ module simple_processor
 		.Q(R6_out)
 	);
 	
-	regn #(.N(16)) R7
+	cntr PC
 	(
-		.clk(clk_50MHz),
+		.clk(pc_incr),
 		.D(mux_out),
 		.load(RX_in[7]),
-		.clear(reset_n),
+		.reset_n(reset_n),
 		
 		.Q(R7_out)
 	);
@@ -156,10 +157,10 @@ module simple_processor
 	(
 		.clk(clk_50MHz),
 		.D(mux_out),
-		.load(A_in),
+		.load(PC_in),
 		.clear(reset_n),
 		
-		.Q(A_out)
+		.Q(PC_out)
 	);
 	
 	mux MX
