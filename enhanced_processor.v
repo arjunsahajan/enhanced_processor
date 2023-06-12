@@ -8,6 +8,7 @@ module enhanced_processor
 	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out,
 	output [15: 0] mux_out,
 	output [15: 0] alu_out,
+	output add_sub_ctrl,
 	output cout,
 	output [3: 0] sel,
 	output IR_in, G_in, A_in, PC_in,
