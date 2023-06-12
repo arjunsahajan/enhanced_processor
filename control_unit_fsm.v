@@ -44,6 +44,7 @@ module control_unit_fsm
 		RX_in <= 8'b11111111;
 		done <= 1'b0;
 		sel <= 4'bxxxx;
+		op <= 2'bxx;
 		
 		case(state)
 			T0: // T0 clock cycle
@@ -78,19 +79,7 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					ADD:
-					begin
-						sel <= RX;
-						A_in <= 1'b0;
-					end
-					
-					SUB:
-					begin
-						sel <= RX;
-						A_in <= 1'b0;
-					end
-		
-					AND:
+					ADD, SUB, AND:
 					begin
 						sel <= RX;
 						A_in <= 1'b0;
@@ -151,18 +140,11 @@ module control_unit_fsm
 			T3: // T3 clock cycle
 			begin
 				case(inst)
-					ADD:
+					ADD, SUB:
 					begin
 						sel <= 4'b1001;
 						RX_in[RX] <= 1'b0;
-						
-						done <= 1'b1;
-					end
-					
-					SUB:
-					begin
-						sel <= 4'b1001;
-						RX_in[RX] <= 1'b0;
+						op <= ADD_SUB;
 						
 						done <= 1'b1;
 					end
@@ -186,7 +168,7 @@ module control_unit_fsm
 	always @(posedge clk)
 	begin
 	
-		if(!reset_n)
+		if(!reset_n || done)
 			state <= IDLE;
 		else if(!run)
 			state <= T0;
