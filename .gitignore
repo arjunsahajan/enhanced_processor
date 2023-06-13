@@ -11,3 +11,4 @@ greybox_tmp/
 *.rpt
 *.vwf
 inst_mem_bb.v
+ssram_256x16_bb.v
