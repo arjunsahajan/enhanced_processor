@@ -137,7 +137,8 @@ module enhanced_processor
 	
 	cntr PC
 	(
-		.clk(pc_incr),
+		.clk(clk_50MHz),
+		.en(pc_incr),
 		.D(mux_out),
 		.load(PC_in),
 		.reset_n(reset_n),
