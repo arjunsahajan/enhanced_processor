@@ -63,7 +63,7 @@ module enhanced_processor
 		.done(done)
 	);
 	
-	// 16-bit general purpose registers R0 - R7
+	// 16-bit general purpose registers R0 - R6
 	regn #(.N(16)) R0
 	(
 		.clk(clk_50MHz),
@@ -134,6 +134,7 @@ module enhanced_processor
 		.Q(R6_out)
 	);
 	
+	// Program counter
 	cntr PC
 	(
 		.clk(clk_50MHz),
@@ -209,6 +210,7 @@ module enhanced_processor
 		.inp7(PC_out),
 		.inp8(IR_out),
 		.inp9(G_out),
+		.inp10(DIN),
 		.sel(sel),
 		
 		.mux_out(mux_out)
