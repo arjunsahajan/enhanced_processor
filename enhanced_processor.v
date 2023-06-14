@@ -5,9 +5,9 @@ module enhanced_processor
 	input run,
 	input reset_n,
 	
-	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out, DOUT_out
+	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out, DOUT_out,
 	output [7: 0] ADDR_out,
-	output W_out, W_in,
+	output W_out, W_inp,
 	output [15: 0] mux_out,
 	output [15: 0] alu_out,
 	output add_sub_ctrl,
@@ -20,14 +20,6 @@ module enhanced_processor
 	output [1: 0] op,
 	output done
 );
-	
-	addr_cntr AC
-	(
-		.clk(clk_addr),
-		.reset_n(reset_n),
-		
-		.addr(addr)
-	);
 	
 	inst_mem IM
 	(
@@ -57,13 +49,16 @@ module enhanced_processor
 		.run(run),
 		.reset_n(reset_n),
 		
-		.W_out(W_out),
+		.ADDR_in(ADDR_in),
+		.pc_incr(pc_incr),
+		.W_inp(W_inp),
 		.add_sub_ctrl(add_sub_ctrl),
 		.op(op),
 		.sel(sel),
 		.IR_in(IR_in),
 		.G_in(G_in), 
 		.A_in(A_in),
+		.PC_in(PC_in),
 		.RX_in(RX_in),
 		.done(done)
 	);
