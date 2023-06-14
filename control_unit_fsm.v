@@ -5,14 +5,19 @@ module control_unit_fsm
 	input reset_n,
 	input [15: 0] IR_out,
 
-	output reg W_in,
+	output reg pc_incr,
+	output reg W_inp,
 	output reg [1: 0] op,
 	output reg add_sub_ctrl,
 	output reg [3: 0] sel,
-	output reg IR_in, G_in, A_in,
+	output reg IR_in, G_in, A_in, ADDR_in, PC_in,
 	output reg [7: 0] RX_in,
 	output reg done
 );
+	
+	parameter SEL_IR_REG = 4'b1000;
+	parameter SEL_G_REG = 4'b1001;
+	parameter SEL_PC_REG = 4'b0111;
 	
 	parameter ADD_SUB = 2'b00;
 	parameter LOGICAL_AND = 2'b01;
@@ -21,12 +26,16 @@ module control_unit_fsm
 	parameter T1 = 3'b001;
 	parameter T2 = 3'b010;
 	parameter T3 = 3'b011;
-	parameter IDLE = 3'b100;
+	parameter T4 = 3'b100;
+	parameter T5 = 3'b101;
+	parameter IDLE = 3'b110;
 
 	parameter MV = 3'b000;
 	parameter MVT = 3'b001;
 	parameter ADD = 3'b010;
 	parameter SUB = 3'b011;
+	parameter LD = 3'b100;
+	parameter ST = 3'b101;
 	parameter AND = 3'b110;
 	
 	reg [2: 0] state, nxt_state;
@@ -39,10 +48,13 @@ module control_unit_fsm
 	always @(state)
 	begin
 		// default values
+		pc_incr <= 1'b0;
 		IR_in <= 1'b1;
 		G_in <= 1'b1;
 		A_in <= 1'b1;
 		RX_in <= 8'b11111111;
+		ADDR_in <= 1'b1;
+		PC_in <= 1'b1;
 		done <= 1'b0;
 		sel <= 4'bxxxx;
 		op <= 2'bxx;
@@ -50,18 +62,30 @@ module control_unit_fsm
 		case(state)
 			T0: // T0 clock cycle
 			begin
-				IR_in <= 1'b0;
+				sel <= SEL_PC_REG;
+				ADDR_in <= 1'b0;
+				pc_incr <= 1'b1;
+				
 				nxt_state <= T1;
 			end
+		
+			T1: // T1 clock cycle
+				nxt_state <= T2;
+		
+			T2: // T2 clock cycle
+			begin
+				IR_in <= 1'b0;
+				nxt_state <= T3;
+			end
 				
-			T1: // T1 clock cycle																																																		
+			T3: // T3 clock cycle																																																		
 			begin
 				case(inst)
 					MV: 
 					begin
 						if(imm_flag)
 						begin
-							sel <= 4'b1000;
+							sel <= SEL_IR_REG;
 						end
 						else
 						begin
@@ -74,7 +98,7 @@ module control_unit_fsm
 					
 					MVT:
 					begin
-						sel <= 4'b1000;
+						sel <= SEL_IR_REG;
 						RX_in[RX] <= 1'b0;
 						
 						done <= 1'b1;
@@ -87,17 +111,17 @@ module control_unit_fsm
 					end
 				endcase
 				
-				nxt_state <= T2;
+				nxt_state <= T4;
 			end
 			
-			T2: // T2 clock cycle
+			T4: // T4 clock cycle
 			begin
 				case(inst)
 					ADD:
 					begin
 						if(imm_flag)
 						begin
-							sel <= 4'b1000;
+							sel <= SEL_IR_REG;
 						end
 						else
 						begin
@@ -111,7 +135,7 @@ module control_unit_fsm
 					begin
 						if(imm_flag)
 						begin
-							sel <= 4'b1000;
+							sel <= SEL_IR_REG;
 						end
 						else
 						begin
@@ -125,7 +149,7 @@ module control_unit_fsm
 					begin
 						if(imm_flag)
 						begin
-							sel <= 4'b1000;
+							sel <= SEL_IR_REG;
 						end
 						else
 						begin
@@ -135,15 +159,15 @@ module control_unit_fsm
 				endcase
 			
 				G_in <= 1'b0;
-				nxt_state <= T3;
+				nxt_state <= T5;
 			end
 			
-			T3: // T3 clock cycle
+			T5: // T5 clock cycle
 			begin
 				case(inst)
 					ADD, SUB:
 					begin
-						sel <= 4'b1001;
+						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
 						op <= ADD_SUB;
 						
@@ -152,7 +176,7 @@ module control_unit_fsm
 					
 					AND:
 					begin
-						sel <= 4'b1001;
+						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
 						op <= LOGICAL_AND;
 						
