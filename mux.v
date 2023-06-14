@@ -1,6 +1,6 @@
 module mux
 (
-	input [15: 0] inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9,
+	input [15: 0] inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10,
 	input [3: 0] sel,
 	
 	output [15: 0] mux_out
@@ -39,6 +39,8 @@ module mux
 			end
 			
 			4'b1001: mux_out_reg <= inp9;
+			
+			4'b1010: mux_out_reg <= inp10;
 		endcase
 	end
 
