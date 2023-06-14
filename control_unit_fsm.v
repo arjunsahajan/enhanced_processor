@@ -5,6 +5,7 @@ module control_unit_fsm
 	input reset_n,
 	input [15: 0] IR_out,
 
+	output reg W_in,
 	output reg [1: 0] op,
 	output reg add_sub_ctrl,
 	output reg [3: 0] sel,

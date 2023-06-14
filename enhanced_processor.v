@@ -5,15 +5,16 @@ module enhanced_processor
 	input run,
 	input reset_n,
 	
-	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out,
+	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out, DOUT_out
+	output [7: 0] ADDR_out,
+	output W_out, W_in,
 	output [15: 0] mux_out,
 	output [15: 0] alu_out,
 	output add_sub_ctrl,
 	output cout,
 	output [3: 0] sel,
-	output IR_in, G_in, A_in, PC_in,
+	output IR_in, G_in, A_in, PC_in, ADDR_in, DOUT_in,
 	output [7: 0] RX_in,
-	output [4: 0] addr,
 	output [15: 0] DIN,
 	output pc_incr,
 	output [1: 0] op,
@@ -30,8 +31,10 @@ module enhanced_processor
 	
 	inst_mem IM
 	(
-		.clock(clk_addr),
-		.address(addr),
+		.clock(clk_50MHz),
+		.address(ADDR_out),
+		.wren(W_out),
+		.data(DOUT_out),
 		
 		.q(DIN)
 	);
@@ -54,6 +57,7 @@ module enhanced_processor
 		.run(run),
 		.reset_n(reset_n),
 		
+		.W_out(W_out),
 		.add_sub_ctrl(add_sub_ctrl),
 		.op(op),
 		.sel(sel),
@@ -168,6 +172,36 @@ module enhanced_processor
 		.Q(A_out)
 	);
 	
+	regn #(.N(16)) ADDR
+	(
+		.clk(clk_50MHz),
+		.D(mux_out),
+		.load(ADDR_in),
+		.clear(reset_n),
+		
+		.Q(ADDR_out)
+	);
+	
+	regn #(.N(16)) DOUT
+	(
+		.clk(clk_50MHz),
+		.D(mux_out),
+		.load(DOUT_in),
+		.clear(reset_n),
+		
+		.Q(DOUT_out)
+	);
+	
+	regn #(.N(1)) WD
+	(
+		.clk(clk_50MHz),
+		.D(W_in),
+		.load(1'b0),
+		.clear(reset_n),
+		
+		.Q(W_out)
+	);
+	
 	mux MX
 	(
 		.inp0(R0_out),
@@ -177,7 +211,7 @@ module enhanced_processor
 		.inp4(R4_out),
 		.inp5(R5_out),
 		.inp6(R6_out),
-		.inp7(R7_out),
+		.inp7(PC_out),
 		.inp8(IR_out),
 		.inp9(G_out),
 		.sel(sel),
