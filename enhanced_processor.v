@@ -49,6 +49,7 @@ module enhanced_processor
 		.run(run),
 		.reset_n(reset_n),
 		
+		.DOUT_in(DOUT_in),
 		.ADDR_in(ADDR_in),
 		.pc_incr(pc_incr),
 		.W_inp(W_inp),
@@ -191,7 +192,7 @@ module enhanced_processor
 	regn #(.N(1)) WD
 	(
 		.clk(clk_50MHz),
-		.D(W_in),
+		.D(W_inp),
 		.load(1'b0),
 		.clear(reset_n),
 		
