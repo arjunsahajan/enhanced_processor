@@ -1,7 +1,6 @@
 module enhanced_processor
 (
 	input clk_50MHz,
-	input clk_addr,
 	input run,
 	input reset_n,
 	
