@@ -10,7 +10,7 @@ module control_unit_fsm
 	output reg [1: 0] op,
 	output reg add_sub_ctrl,
 	output reg [3: 0] sel,
-	output reg IR_in, G_in, A_in, ADDR_in, PC_in,
+	output reg IR_in, G_in, A_in, ADDR_in, PC_in, DOUT_in,
 	output reg [7: 0] RX_in,
 	output reg done
 );
@@ -18,6 +18,7 @@ module control_unit_fsm
 	parameter SEL_IR_REG = 4'b1000;
 	parameter SEL_G_REG = 4'b1001;
 	parameter SEL_PC_REG = 4'b0111;
+	parameter SEL_DIN = 4'b1010;
 	
 	parameter ADD_SUB = 2'b00;
 	parameter LOGICAL_AND = 2'b01;
@@ -54,7 +55,9 @@ module control_unit_fsm
 		A_in <= 1'b1;
 		RX_in <= 8'b11111111;
 		ADDR_in <= 1'b1;
+		DOUT_in <= 1'b1;
 		PC_in <= 1'b1;
+		W_inp <= 1'b0;
 		done <= 1'b0;
 		sel <= 4'bxxxx;
 		op <= 2'bxx;
@@ -70,7 +73,9 @@ module control_unit_fsm
 			end
 		
 			T1: // T1 clock cycle
+			begin
 				nxt_state <= T2;
+			end
 		
 			T2: // T2 clock cycle
 			begin
@@ -109,6 +114,12 @@ module control_unit_fsm
 						sel <= RX;
 						A_in <= 1'b0;
 					end
+					
+					LD, ST:
+					begin
+						sel <= RY;
+						ADDR_in <= 1'b0;
+					end
 				endcase
 				
 				nxt_state <= T4;
@@ -129,6 +140,7 @@ module control_unit_fsm
 						end
 						
 						add_sub_ctrl <= 1'b0;
+						G_in <= 1'b0;
 					end	
 					
 					SUB:
@@ -143,6 +155,7 @@ module control_unit_fsm
 						end
 						
 						add_sub_ctrl <= 1'b1;
+						G_in <= 1'b0;
 					end
 					
 					AND:
@@ -155,10 +168,20 @@ module control_unit_fsm
 						begin
 							sel <= RY;
 						end
+						
+						G_in <= 1'b0;
+					end
+					
+					ST:
+					begin
+						sel <= RX;
+						DOUT_in <= 1'b0;
+						W_inp <= 1'b1;
+						
+						done <= 1'b1;
 					end
 				endcase
 			
-				G_in <= 1'b0;
 				nxt_state <= T5;
 			end
 			
@@ -179,6 +202,14 @@ module control_unit_fsm
 						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
 						op <= LOGICAL_AND;
+						
+						done <= 1'b1;
+					end
+					
+					LD:
+					begin
+						sel <= SEL_DIN;
+						RX_in[RX] <= 1'b0;
 						
 						done <= 1'b1;
 					end
