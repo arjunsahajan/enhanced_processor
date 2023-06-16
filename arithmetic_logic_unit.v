@@ -7,7 +7,8 @@ module arithmetic_logic_unit
 	input [1: 0] op,
 	
 	output [n - 1: 0] alu_out,
-	output cout
+	output cout,
+	output z_flag
 );
 	
 	parameter ADD_SUB = 2'b00;
@@ -19,6 +20,7 @@ module arithmetic_logic_unit
 	wire [n: 0] c;
 	
 	reg [n - 1: 0] alu_out_reg;
+	reg z_flag_reg;
 	
 	assign c[0] = cin;
 	assign cout = c[n];
@@ -67,6 +69,15 @@ module arithmetic_logic_unit
 		endcase
 	end
 	
+	always @(alu_out)
+	begin
+		if(alu_out)
+			z_flag_reg = 1'b0;
+		else
+			z_flag_reg = 1'b1;
+	end
+	
+	assign z_flag = z_flag_reg;
 	assign alu_out = alu_out_reg;
 	
 endmodule 

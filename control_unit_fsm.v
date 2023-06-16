@@ -4,6 +4,9 @@ module control_unit_fsm
 	input run,
 	input reset_n,
 	input [15: 0] IR_out,
+	input cout,
+	input z_flag,
+	input n_flag,
 
 	output reg pc_incr,
 	output reg W_inp,

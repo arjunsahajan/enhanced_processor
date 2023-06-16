@@ -10,5 +10,6 @@ greybox_tmp/
 *.qip
 *.rpt
 *.vwf
+*.stp
 inst_mem_bb.v
 addr_cntr.v

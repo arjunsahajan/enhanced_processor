@@ -6,13 +6,14 @@ module enhanced_processor
 	
 	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out, DOUT_out,
 	output [7: 0] ADDR_out,
+	output [2: 0] flag_out,
 	output W_out, W_inp,
 	output [15: 0] mux_out,
 	output [15: 0] alu_out,
 	output add_sub_ctrl,
-	output cout,
+	output cout, z_flag,
 	output [3: 0] sel,
-	output IR_in, G_in, A_in, PC_in, ADDR_in, DOUT_in,
+	output IR_in, G_in, A_in, PC_in, ADDR_in, DOUT_in, flag_in,
 	output [7: 0] RX_in,
 	output [15: 0] DIN,
 	output pc_incr,
@@ -47,6 +48,9 @@ module enhanced_processor
 		.IR_out(IR_out),
 		.run(run),
 		.reset_n(reset_n),
+		.cout(cout),
+		.z_flag(z_flag),
+		.n_flag(alu_out[15]),
 		
 		.DOUT_in(DOUT_in),
 		.ADDR_in(ADDR_in),
@@ -198,6 +202,16 @@ module enhanced_processor
 		.Q(W_out)
 	);
 	
+	regn #(.N(3)) flag
+	(
+		.clk(clk_50MHz),
+		.D({cout, alu_out[15], z_flag}),
+		.load(flag_in),
+		.clear(reset_n),
+		
+		.Q(flag_out)
+	);
+	
 	mux MX
 	(
 		.inp0(R0_out),
@@ -225,7 +239,8 @@ module enhanced_processor
 		.op(op),
 		
 		.alu_out(alu_out),
-		.cout(cout)
+		.cout(cout),
+		.z_flag(z_flag)
 	);
 	
 endmodule
