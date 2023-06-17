@@ -41,6 +41,15 @@ module control_unit_fsm
 	parameter LD = 3'b100;
 	parameter ST = 3'b101;
 	parameter AND = 3'b110;
+	parameter BRN = 3'b111;
+	
+	parameter AB = 3'b000;
+	parameter EQ = 3'b001;
+	parameter NE = 3'b010;
+	parameter CC = 3'b011;
+	parameter CS = 3'b100;
+	parameter PL = 3'b101;
+	parameter MI = 3'b110;
 	
 	reg [2: 0] state, nxt_state;
 		
@@ -123,6 +132,52 @@ module control_unit_fsm
 						sel <= RY;
 						ADDR_in <= 1'b0;
 					end
+					
+					BRN:
+					begin
+						sel <= SEL_PC_REG;
+						A_in <= 1'b0;
+						
+						case(RX)
+							AB:
+								// always branch
+							EQ:
+							begin
+								if(!z_flag )
+									done <= 1'b1;
+							end
+							
+							NE:
+							begin
+								if(z_flag)
+									done <= 1'b1;
+							end
+							
+							CC:
+							begin
+								if(cout)
+									done <= 1'b1;
+							end
+							
+							CS:
+							begin
+								if(!cout)
+									done <= 1'b1;
+							end
+							
+							PL:
+							begin
+								if(!n_flag)
+									done <= 1'b1;
+							end
+							
+							MI:
+							begin
+								if(n_flag)
+									done <= 1'b1;
+							end
+						endcase
+					end
 				endcase
 				
 				nxt_state <= T4;
@@ -183,6 +238,12 @@ module control_unit_fsm
 						
 						done <= 1'b1;
 					end
+					
+					BRN:
+					begin
+						sel <= SEL_IR_REG;
+						G_in <= 1'b0;
+					end
 				endcase
 			
 				nxt_state <= T5;
@@ -213,6 +274,14 @@ module control_unit_fsm
 					begin
 						sel <= SEL_DIN;
 						RX_in[RX] <= 1'b0;
+						
+						done <= 1'b1;
+					end
+					
+					BRN:
+					begin
+						sel <= SEL_G_REG;
+						PC_in <= 1'b0;
 						
 						done <= 1'b1;
 					end
