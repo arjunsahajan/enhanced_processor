@@ -11,8 +11,9 @@ module arithmetic_logic_unit
 	output z_flag
 );
 	
-	parameter ADD_SUB = 2'b00;
-	parameter LOGICAL_AND = 2'b01;
+	parameter OP_ADD_SUB = 2'b00;
+	parameter OP_LOGICAL_AND = 2'b01;
+	parameter OP_NONE = 2'b11;
 
 	wire [n - 1: 0] sum;
 	wire [n - 1: 0] logical_and;
@@ -57,15 +58,14 @@ module arithmetic_logic_unit
 	always @(op)
 	begin
 		case(op)
-			ADD_SUB: 
-			begin
+			OP_ADD_SUB: 
 				alu_out_reg <= sum;
-			end
 			
-			LOGICAL_AND:
-			begin
+			OP_LOGICAL_AND:
 				alu_out_reg <= logical_and;
-			end
+			
+			OP_NONE:
+				alu_out_reg <= 16'bx;
 		endcase
 	end
 	

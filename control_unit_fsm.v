@@ -8,12 +8,13 @@ module control_unit_fsm
 	input z_flag,
 	input n_flag,
 
+	output reg flag_in,
 	output reg pc_incr,
 	output reg W_inp,
 	output reg [1: 0] op,
 	output reg add_sub_ctrl,
 	output reg [3: 0] sel,
-	output reg IR_in, G_in, A_in, ADDR_in, PC_in, DOUT_in,
+	output reg IR_in, G_in, A_in, ADDR_in, DOUT_in,
 	output reg [7: 0] RX_in,
 	output reg done
 );
@@ -23,8 +24,9 @@ module control_unit_fsm
 	parameter SEL_PC_REG = 4'b0111;
 	parameter SEL_DIN = 4'b1010;
 	
-	parameter ADD_SUB = 2'b00;
-	parameter LOGICAL_AND = 2'b01;
+	parameter OP_ADD_SUB = 2'b00;
+	parameter OP_LOGICAL_AND = 2'b01;
+	parameter OP_NONE = 2'b11;
 
 	parameter T0 = 3'b000;
 	parameter T1 = 3'b001;
@@ -51,6 +53,8 @@ module control_unit_fsm
 	parameter PL = 3'b101;
 	parameter MI = 3'b110;
 	
+	parameter PC_in = 7;
+	
 	reg [2: 0] state, nxt_state;
 		
 	wire [2: 0] inst;
@@ -65,14 +69,14 @@ module control_unit_fsm
 		IR_in <= 1'b1;
 		G_in <= 1'b1;
 		A_in <= 1'b1;
+		flag_in <= 1'b1;
 		RX_in <= 8'b11111111;
 		ADDR_in <= 1'b1;
 		DOUT_in <= 1'b1;
-		PC_in <= 1'b1;
 		W_inp <= 1'b0;
 		done <= 1'b0;
 		sel <= 4'bxxxx;
-		op <= 2'bxx;
+		op <= OP_NONE;
 		
 		case(state)
 			T0: // T0 clock cycle
@@ -256,7 +260,8 @@ module control_unit_fsm
 					begin
 						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
-						op <= ADD_SUB;
+						op <= OP_ADD_SUB;
+						flag_in <= 1'b0;
 						
 						done <= 1'b1;
 					end
@@ -265,7 +270,8 @@ module control_unit_fsm
 					begin
 						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
-						op <= LOGICAL_AND;
+						op <= OP_LOGICAL_AND;
+						flag_in <= 1'b0;
 						
 						done <= 1'b1;
 					end
@@ -281,7 +287,7 @@ module control_unit_fsm
 					BRN:
 					begin
 						sel <= SEL_G_REG;
-						PC_in <= 1'b0;
+						RX_in[PC_in] <= 1'b0;
 						
 						done <= 1'b1;
 					end

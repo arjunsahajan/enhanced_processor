@@ -18,15 +18,14 @@
 WIDTH=16;
 DEPTH=256;
 
-ADDRESS_RADIX=UNS;
+ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-	0    :   140F;
-	1    :   11FF;
-	2    :   A002;
-	3    :   8602;
-	[4..14]  :   0000;
-	15   :   DDDD;
-	[16..255]  :   0000;
+	000  :   3610;
+	001  :   3830;
+	002  :   8004;
+	003  :   A003;
+	004  :   1E02;
+	[005..0FF]  :   0000;
 END;

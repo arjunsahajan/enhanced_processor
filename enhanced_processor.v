@@ -13,7 +13,7 @@ module enhanced_processor
 	output add_sub_ctrl,
 	output cout, z_flag,
 	output [3: 0] sel,
-	output IR_in, G_in, A_in, PC_in, ADDR_in, DOUT_in, flag_in,
+	output IR_in, G_in, A_in, ADDR_in, DOUT_in, flag_in,
 	output [7: 0] RX_in,
 	output [15: 0] DIN,
 	output pc_incr,
@@ -52,6 +52,7 @@ module enhanced_processor
 		.z_flag(z_flag),
 		.n_flag(alu_out[15]),
 		
+		.flag_in(flag_in),
 		.DOUT_in(DOUT_in),
 		.ADDR_in(ADDR_in),
 		.pc_incr(pc_incr),
@@ -62,7 +63,6 @@ module enhanced_processor
 		.IR_in(IR_in),
 		.G_in(G_in), 
 		.A_in(A_in),
-		.PC_in(PC_in),
 		.RX_in(RX_in),
 		.done(done)
 	);
@@ -144,7 +144,7 @@ module enhanced_processor
 		.clk(clk_50MHz),
 		.en(pc_incr),
 		.D(mux_out),
-		.load(PC_in),
+		.load(RX_in[7]),
 		.reset_n(reset_n),
 		
 		.Q(PC_out)
@@ -172,6 +172,7 @@ module enhanced_processor
 		.Q(A_out)
 	);
 	
+	// Address register
 	regn #(.N(16)) ADDR
 	(
 		.clk(clk_50MHz),
@@ -182,6 +183,7 @@ module enhanced_processor
 		.Q(ADDR_out)
 	);
 	
+	// Data out register
 	regn #(.N(16)) DOUT
 	(
 		.clk(clk_50MHz),
@@ -192,16 +194,17 @@ module enhanced_processor
 		.Q(DOUT_out)
 	);
 	
-	regn #(.N(1)) WD
+	// Write enable register
+	regn_no_load #(.N(1)) WD
 	(
 		.clk(clk_50MHz),
 		.D(W_inp),
-		.load(1'b0),
 		.clear(reset_n),
 		
 		.Q(W_out)
 	);
 	
+	// Flag register
 	regn #(.N(3)) flag
 	(
 		.clk(clk_50MHz),
