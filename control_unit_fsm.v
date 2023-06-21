@@ -247,6 +247,8 @@ module control_unit_fsm
 					begin
 						sel <= SEL_IR_REG;
 						G_in <= 1'b0;
+						add_sub_ctrl <= 1'b0;
+						op <= OP_ADD_SUB;
 					end
 				endcase
 			
