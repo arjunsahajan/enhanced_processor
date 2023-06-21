@@ -6,7 +6,6 @@ module mux
 	output [15: 0] mux_out
 );
 
-	parameter MV = 3'b000;
 	parameter MVT = 3'b001;
 	
 	reg [15: 0] mux_out_reg;
