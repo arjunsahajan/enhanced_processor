@@ -40,6 +40,8 @@ module mux
 			4'b1001: mux_out_reg <= inp9;
 			
 			4'b1010: mux_out_reg <= inp10;
+			
+			default: mux_out_reg <= 16'bxxxx_xxxx_xxxx_Xxxx;
 		endcase
 	end
 

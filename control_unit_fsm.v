@@ -4,9 +4,7 @@ module control_unit_fsm
 	input run,
 	input reset_n,
 	input [15: 0] IR_out,
-	input cout,
-	input z_flag,
-	input n_flag,
+	input [2: 0] flag_out,
 
 	output reg flag_in,
 	output reg pc_incr,
@@ -16,7 +14,8 @@ module control_unit_fsm
 	output reg [3: 0] sel,
 	output reg IR_in, G_in, A_in, ADDR_in, DOUT_in,
 	output reg [7: 0] RX_in,
-	output reg done
+	output reg done,
+	output reg degub_sig
 );
 	
 	parameter SEL_IR_REG = 4'b1000;
@@ -26,7 +25,6 @@ module control_unit_fsm
 	
 	parameter OP_ADD_SUB = 2'b00;
 	parameter OP_LOGICAL_AND = 2'b01;
-	parameter OP_NONE = 2'b11;
 
 	parameter T0 = 3'b000;
 	parameter T1 = 3'b001;
@@ -61,6 +59,7 @@ module control_unit_fsm
 	wire [2: 0] RX;
 	wire [2: 0] RY;
 	wire imm_flag;
+	wire cout, n_flag, z_flag;
 	
 	always @(state)
 	begin
@@ -76,7 +75,8 @@ module control_unit_fsm
 		W_inp <= 1'b0;
 		done <= 1'b0;
 		sel <= 4'bxxxx;
-		op <= OP_NONE;
+		op <= 2'bxx;
+		degub_sig <= 1'b0;
 		
 		case(state)
 			T0: // T0 clock cycle
@@ -144,41 +144,62 @@ module control_unit_fsm
 						
 						case(RX)
 							AB:
+							begin
 								// always branch
+								degub_sig <= 1'b1;
+							end
+							
 							EQ:
 							begin
-								if(!z_flag )
+								if(!z_flag)
+								begin
 									done <= 1'b1;
+								end
 							end
 							
 							NE:
 							begin
 								if(z_flag)
+								begin
 									done <= 1'b1;
+								end
 							end
 							
 							CC:
 							begin
 								if(cout)
+								begin
 									done <= 1'b1;
+								end
 							end
 							
 							CS:
 							begin
 								if(!cout)
+								begin
 									done <= 1'b1;
+								end
 							end
 							
 							PL:
 							begin
 								if(!n_flag)
+								begin
 									done <= 1'b1;
+								end
 							end
 							
 							MI:
 							begin
 								if(n_flag)
+								begin
 									done <= 1'b1;
+								end
+							end
+							
+							default:
+							begin
+								done <= 1'b1;
 							end
 						endcase
 					end
@@ -203,6 +224,7 @@ module control_unit_fsm
 						
 						add_sub_ctrl <= 1'b0;
 						G_in <= 1'b0;
+						flag_in <= 1'b0;
 					end	
 					
 					SUB:
@@ -218,6 +240,7 @@ module control_unit_fsm
 						
 						add_sub_ctrl <= 1'b1;
 						G_in <= 1'b0;
+						flag_in <= 1'b0;
 					end
 					
 					AND:
@@ -232,6 +255,7 @@ module control_unit_fsm
 						end
 						
 						G_in <= 1'b0;
+						flag_in <= 1'b0;
 					end
 					
 					ST:
@@ -263,7 +287,6 @@ module control_unit_fsm
 						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
 						op <= OP_ADD_SUB;
-						flag_in <= 1'b0;
 						
 						done <= 1'b1;
 					end
@@ -273,7 +296,6 @@ module control_unit_fsm
 						sel <= SEL_G_REG;
 						RX_in[RX] <= 1'b0;
 						op <= OP_LOGICAL_AND;
-						flag_in <= 1'b0;
 						
 						done <= 1'b1;
 					end
@@ -318,4 +340,7 @@ module control_unit_fsm
 	assign RY = IR_out[2: 0];
 	assign imm_flag = IR_out[12];
 	
+	assign cout = flag_out[2];
+	assign n_flag = flag_out[1];
+	assign z_flag = flag_out[0];
 endmodule

@@ -13,7 +13,6 @@ module arithmetic_logic_unit
 	
 	parameter OP_ADD_SUB = 2'b00;
 	parameter OP_LOGICAL_AND = 2'b01;
-	parameter OP_NONE = 2'b11;
 
 	wire [n - 1: 0] sum;
 	wire [n - 1: 0] logical_and;
@@ -64,8 +63,8 @@ module arithmetic_logic_unit
 			OP_LOGICAL_AND:
 				alu_out_reg <= logical_and;
 			
-			OP_NONE:
-				alu_out_reg <= 16'bx;
+			default:
+				alu_out_reg <= 16'bxxxx_xxxx_xxxx_xxxx;
 		endcase
 	end
 	

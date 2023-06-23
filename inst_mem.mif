@@ -22,9 +22,9 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-	000  :   3610;
-	001  :   10DD;
-	002  :   10EE;
-	003  :   E1FD;
+	000  :   1010;
+	001  :   1220;
+	002  :   6001;
+	003  :   E3FD;
 	[004..0FF]  :   0000;
 END;

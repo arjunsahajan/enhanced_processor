@@ -18,7 +18,8 @@ module enhanced_processor
 	output [15: 0] DIN,
 	output pc_incr,
 	output [1: 0] op,
-	output done
+	output done,
+	output degub_sig
 );
 	
 	inst_mem IM
@@ -48,10 +49,9 @@ module enhanced_processor
 		.IR_out(IR_out),
 		.run(run),
 		.reset_n(reset_n),
-		.cout(cout),
-		.z_flag(z_flag),
-		.n_flag(alu_out[15]),
+		.flag_out(flag_out),
 		
+		.degub_sig(degub_sig),
 		.flag_in(flag_in),
 		.DOUT_in(DOUT_in),
 		.ADDR_in(ADDR_in),
