@@ -183,7 +183,7 @@ module control_unit_fsm
 							
 							PL:
 							begin
-								if(!n_flag)
+								if(n_flag)
 								begin
 									done <= 1'b1;
 								end
@@ -191,7 +191,7 @@ module control_unit_fsm
 							
 							MI:
 							begin
-								if(n_flag)
+								if(!n_flag)
 								begin
 									done <= 1'b1;
 								end
