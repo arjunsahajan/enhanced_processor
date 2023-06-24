@@ -13,3 +13,4 @@ greybox_tmp/
 *.stp
 inst_mem_bb.v
 addr_cntr.v
+mifs/
