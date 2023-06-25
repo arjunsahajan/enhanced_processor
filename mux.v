@@ -6,7 +6,7 @@ module mux
 	output [15: 0] mux_out
 );
 
-	parameter MVT = 3'b001;
+	parameter MVT_BRN = 3'b001;
 	
 	reg [15: 0] mux_out_reg;
 
@@ -31,7 +31,7 @@ module mux
 			
 			4'b1000: 
 			begin
-				if(inp8[15: 13] == MVT)
+				if(inp8[15: 13] == MVT_BRN && inp8[12])
 					mux_out_reg <= {inp8[7: 0], 8'b0};
 				else
 					mux_out_reg <= {{7{inp8[8]}}, inp8[8: 0]};

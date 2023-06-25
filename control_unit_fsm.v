@@ -35,13 +35,13 @@ module control_unit_fsm
 	parameter IDLE = 3'b110;
 
 	parameter MV = 3'b000;
-	parameter MVT = 3'b001;
+	parameter MVT_BRN = 3'b001;
 	parameter ADD = 3'b010;
 	parameter SUB = 3'b011;
 	parameter LD = 3'b100;
 	parameter ST = 3'b101;
 	parameter AND = 3'b110;
-	parameter BRN = 3'b111;
+//	parameter BRN = 3'b111;
 	
 	parameter AB = 3'b000;
 	parameter EQ = 3'b001;
@@ -117,14 +117,6 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					MVT:
-					begin
-						sel <= SEL_IR_REG;
-						RX_in[RX] <= 1'b0;
-						
-						done <= 1'b1;
-					end
-					
 					ADD, SUB, AND:
 					begin
 						sel <= RX;
@@ -137,71 +129,81 @@ module control_unit_fsm
 						ADDR_in <= 1'b0;
 					end
 					
-					BRN:
+					MVT_BRN:
 					begin
-						sel <= SEL_PC_REG;
-						A_in <= 1'b0;
-						
-						case(RX)
-							AB:
-							begin
-								// always branch
-								degub_sig <= 1'b1;
-							end
+						if(imm_flag)
+						begin
+							sel <= SEL_IR_REG;
+							RX_in[RX] <= 1'b0;
 							
-							EQ:
-							begin
-								if(!z_flag)
+							done <= 1'b1;
+						end
+						else
+						begin
+							sel <= SEL_PC_REG;
+							A_in <= 1'b0;
+							
+							case(RX)
+								AB:
+								begin
+									// always branch
+									degub_sig <= 1'b1;
+								end
+								
+								EQ:
+								begin
+									if(!z_flag)
+									begin
+										done <= 1'b1;
+									end
+								end
+								
+								NE:
+								begin
+									if(z_flag)
+									begin
+										done <= 1'b1;
+									end
+								end
+								
+								CC:
+								begin
+									if(cout)
+									begin
+										done <= 1'b1;
+									end
+								end
+								
+								CS:
+								begin
+									if(!cout)
+									begin
+										done <= 1'b1;
+									end
+								end
+								
+								PL:
+								begin
+									if(n_flag)
+									begin
+										done <= 1'b1;
+									end
+								end
+								
+								MI:
+								begin
+									if(!n_flag)
+									begin
+										done <= 1'b1;
+									end
+								end
+								
+								default:
 								begin
 									done <= 1'b1;
 								end
-							end
-							
-							NE:
-							begin
-								if(z_flag)
-								begin
-									done <= 1'b1;
-								end
-							end
-							
-							CC:
-							begin
-								if(cout)
-								begin
-									done <= 1'b1;
-								end
-							end
-							
-							CS:
-							begin
-								if(!cout)
-								begin
-									done <= 1'b1;
-								end
-							end
-							
-							PL:
-							begin
-								if(n_flag)
-								begin
-									done <= 1'b1;
-								end
-							end
-							
-							MI:
-							begin
-								if(!n_flag)
-								begin
-									done <= 1'b1;
-								end
-							end
-							
-							default:
-							begin
-								done <= 1'b1;
-							end
-						endcase
+							endcase
+						end
 					end
 				endcase
 				
@@ -267,7 +269,7 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					BRN:
+					MVT_BRN:
 					begin
 						sel <= SEL_IR_REG;
 						G_in <= 1'b0;
@@ -308,7 +310,7 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					BRN:
+					MVT_BRN:
 					begin
 						sel <= SEL_G_REG;
 						RX_in[PC_in] <= 1'b0;
