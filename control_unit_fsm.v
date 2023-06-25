@@ -41,7 +41,6 @@ module control_unit_fsm
 	parameter LD = 3'b100;
 	parameter ST = 3'b101;
 	parameter AND = 3'b110;
-//	parameter BRN = 3'b111;
 	
 	parameter AB = 3'b000;
 	parameter EQ = 3'b001;
