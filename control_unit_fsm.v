@@ -14,6 +14,7 @@ module control_unit_fsm
 	output reg [3: 0] sel,
 	output reg IR_in, G_in, A_in, ADDR_in, DOUT_in,
 	output reg [7: 0] RX_in,
+	output reg [1: 0] shift_rot_type,
 	output reg done,
 	output reg degub_sig
 );
@@ -25,6 +26,7 @@ module control_unit_fsm
 	
 	parameter OP_ADD_SUB = 2'b00;
 	parameter OP_LOGICAL_AND = 2'b01;
+	parameter OP_SHFT_ROT = 2'b10;
 
 	parameter T0 = 3'b000;
 	parameter T1 = 3'b001;
@@ -41,6 +43,7 @@ module control_unit_fsm
 	parameter LD = 3'b100;
 	parameter ST = 3'b101;
 	parameter AND = 3'b110;
+	parameter CMP_SHFT_ROT = 3'b111;
 	
 	parameter AB = 3'b000;
 	parameter EQ = 3'b001;
@@ -59,6 +62,8 @@ module control_unit_fsm
 	wire [2: 0] RY;
 	wire imm_flag;
 	wire cout, n_flag, z_flag;
+	wire cmp_or_shft_rot;
+	wire imm_flag_shft_rot;
 	
 	always @(state)
 	begin
@@ -75,6 +80,7 @@ module control_unit_fsm
 		done <= 1'b0;
 		sel <= 4'bxxxx;
 		op <= 2'bxx;
+		shift_rot_type <= 2'bxx;
 		degub_sig <= 1'b0;
 		
 		case(state)
@@ -126,6 +132,12 @@ module control_unit_fsm
 					begin
 						sel <= RY;
 						ADDR_in <= 1'b0;
+					end
+					
+					CMP_SHFT_ROT:
+					begin
+						sel <= RX;
+						A_in <= 1'b0;
 					end
 					
 					MVT_BRN:
@@ -268,6 +280,48 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
+					CMP_SHFT_ROT:
+					begin
+						if(imm_flag) // cmp with immediate
+						begin
+							sel <= SEL_IR_REG;
+							add_sub_ctrl <= 1'b1;
+							op <= OP_ADD_SUB;
+							flag_in <= 1'b0;
+							
+							done <= 1'b1;
+						end
+						else
+						begin
+							if(cmp_or_shft_rot) // shift or rotate
+							begin
+								shift_rot_type <= IR_out[6: 5];
+							
+								if(imm_flag_shft_rot)
+								begin
+									sel <= SEL_IR_REG;
+								end
+								else
+								begin
+									sel <= RY;
+								end
+								
+								op <= OP_SHFT_ROT;
+								G_in <= 1'b0;
+								flag_in <= 1'b0;
+							end
+							else // cmp with register
+							begin 
+								sel <= RY;
+								add_sub_ctrl <= 1'b1;
+								op <= OP_ADD_SUB;
+								flag_in <= 1'b0;
+								
+								done <= 1'b1;
+							end
+						end
+					end
+					
 					MVT_BRN:
 					begin
 						sel <= SEL_IR_REG;
@@ -316,6 +370,14 @@ module control_unit_fsm
 						
 						done <= 1'b1;
 					end
+					
+					CMP_SHFT_ROT:
+					begin
+						sel <= SEL_G_REG;
+						RX_in[RX] = 1'b0;
+						
+						done <= 1'b1;
+					end
 				endcase
 			end
 			
@@ -340,6 +402,8 @@ module control_unit_fsm
 	assign RX = IR_out[11: 9];
 	assign RY = IR_out[2: 0];
 	assign imm_flag = IR_out[12];
+	assign imm_flag_shft_rot = IR_out[7];
+	assign cmp_or_shft_rot = IR_out[8];
 	
 	assign cout = flag_out[2];
 	assign n_flag = flag_out[1];

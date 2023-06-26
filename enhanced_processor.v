@@ -18,6 +18,7 @@ module enhanced_processor
 	output [15: 0] DIN,
 	output pc_incr,
 	output [1: 0] op,
+	output [1: 0] shift_rot_type,
 	output done,
 	output degub_sig
 );
@@ -64,6 +65,7 @@ module enhanced_processor
 		.G_in(G_in), 
 		.A_in(A_in),
 		.RX_in(RX_in),
+		.shift_rot_type(shift_rot_type),
 		.done(done)
 	);
 	
@@ -240,6 +242,7 @@ module enhanced_processor
 		.cin(add_sub_ctrl), 
 		.add_sub_control(add_sub_ctrl),
 		.op(op),
+		.shift_rot_type(shift_rot_type),
 		
 		.alu_out(alu_out),
 		.cout(cout),
