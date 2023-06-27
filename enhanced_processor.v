@@ -4,7 +4,7 @@ module enhanced_processor
 	input run,
 	input reset_n,
 	
-	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, R5_out, R6_out, PC_out, G_out, A_out, DOUT_out,
+	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, SP_out, R6_out, PC_out, G_out, A_out, DOUT_out,
 	output [7: 0] ADDR_out,
 	output [2: 0] flag_out,
 	output W_out, W_inp,
@@ -17,6 +17,8 @@ module enhanced_processor
 	output [7: 0] RX_in,
 	output [15: 0] DIN,
 	output pc_incr,
+	output sp_incr,
+	output sp_decr,
 	output [1: 0] op,
 	output [1: 0] shift_rot_type,
 	output done,
@@ -52,6 +54,8 @@ module enhanced_processor
 		.reset_n(reset_n),
 		.flag_out(flag_out),
 		
+		.sp_incr(sp_incr),
+		.sp_decr(sp_decr),
 		.degub_sig(degub_sig),
 		.flag_in(flag_in),
 		.DOUT_in(DOUT_in),
@@ -120,14 +124,17 @@ module enhanced_processor
 		.Q(R4_out)
 	);
 	
-	regn #(.N(16)) R5
+	// Stack pointer
+	stack_ptr SP
 	(
 		.clk(clk_50MHz),
 		.D(mux_out),
 		.load(RX_in[5]),
-		.clear(reset_n),
+		.reset_n(reset_n),
+		.sp_incr(sp_incr),
+		.sp_decr(sp_decr),
 		
-		.Q(R5_out)
+		.Q(SP_out)
 	);
 	
 	regn #(.N(16)) R6
@@ -224,7 +231,7 @@ module enhanced_processor
 		.inp2(R2_out),
 		.inp3(R3_out),
 		.inp4(R4_out),
-		.inp5(R5_out),
+		.inp5(SP_out),
 		.inp6(R6_out),
 		.inp7(PC_out),
 		.inp8(IR_out),

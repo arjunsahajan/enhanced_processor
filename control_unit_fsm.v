@@ -6,6 +6,8 @@ module control_unit_fsm
 	input [15: 0] IR_out,
 	input [2: 0] flag_out,
 
+	output reg sp_incr,
+	output reg sp_decr,
 	output reg flag_in,
 	output reg pc_incr,
 	output reg W_inp,
@@ -40,8 +42,8 @@ module control_unit_fsm
 	parameter MVT_BRN = 3'b001;
 	parameter ADD = 3'b010;
 	parameter SUB = 3'b011;
-	parameter LD = 3'b100;
-	parameter ST = 3'b101;
+	parameter LD_POP = 3'b100;
+	parameter ST_PUSH = 3'b101;
 	parameter AND = 3'b110;
 	parameter CMP_SHFT_ROT = 3'b111;
 	
@@ -69,6 +71,8 @@ module control_unit_fsm
 	begin
 		// default values
 		pc_incr <= 1'b0;
+		sp_incr <= 1'b0;
+		sp_decr <= 1'b0;
 		IR_in <= 1'b1;
 		G_in <= 1'b1;
 		A_in <= 1'b1;
@@ -128,10 +132,32 @@ module control_unit_fsm
 						A_in <= 1'b0;
 					end
 					
-					LD, ST:
+					LD_POP:
 					begin
-						sel <= RY;
-						ADDR_in <= 1'b0;
+						if(imm_flag) // pop
+						begin
+							sel <= RY;
+							ADDR_in <= 1'b0;
+							sp_incr <= 1'b1;
+						end
+						else // ld
+						begin
+							sel <= RY;
+							ADDR_in <= 1'b0;
+						end
+					end
+					
+					ST_PUSH:
+					begin
+						if(imm_flag) // push
+						begin
+							sp_decr <= 1'b1;
+						end
+						else // st
+						begin
+							sel <= RY;
+							ADDR_in <= 1'b0;
+						end
 					end
 					
 					CMP_SHFT_ROT:
@@ -271,13 +297,21 @@ module control_unit_fsm
 						flag_in <= 1'b0;
 					end
 					
-					ST:
+					ST_PUSH:
 					begin
-						sel <= RX;
-						DOUT_in <= 1'b0;
-						W_inp <= 1'b1;
-						
-						done <= 1'b1;
+						if(imm_flag) // push
+						begin
+							sel <= RY;
+							ADDR_in <= 1'b0;
+						end
+						else // st
+						begin
+							sel <= RX;
+							DOUT_in <= 1'b0;
+							W_inp <= 1'b1;
+							
+							done <= 1'b1;
+						end
 					end
 					
 					CMP_SHFT_ROT:
@@ -355,12 +389,34 @@ module control_unit_fsm
 						done <= 1'b1;
 					end
 					
-					LD:
+					LD_POP:
 					begin
-						sel <= SEL_DIN;
-						RX_in[RX] <= 1'b0;
-						
-						done <= 1'b1;
+						if(imm_flag) //pop
+						begin
+							sel <= SEL_DIN;
+							RX_in[RX] <= 1'b0;
+							
+							done <= 1'b1;
+						end
+						else // ld
+						begin
+							sel <= SEL_DIN;
+							RX_in[RX] <= 1'b0;
+							
+							done <= 1'b1;
+						end
+					end
+					
+					ST_PUSH:
+					begin
+						if(imm_flag) // push
+						begin
+							sel <= RX;
+							DOUT_in <= 1'b0;
+							W_inp <= 1'b1;
+							
+							done <= 1'b1;
+						end
 					end
 					
 					MVT_BRN:
@@ -395,7 +451,6 @@ module control_unit_fsm
 			state <= T0;
 		else
 			state <= nxt_state;
-		
 	end
 	
 	assign inst = IR_out[15: 13];
