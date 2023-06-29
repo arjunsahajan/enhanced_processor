@@ -11,6 +11,7 @@ greybox_tmp/
 *.rpt
 *.vwf
 *.stp
+*.qws
 inst_mem_bb.v
 addr_cntr.v
 mifs/
