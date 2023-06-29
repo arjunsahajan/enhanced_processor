@@ -54,8 +54,10 @@ module control_unit_fsm
 	parameter CS = 3'b100;
 	parameter PL = 3'b101;
 	parameter MI = 3'b110;
+	parameter BL = 3'b111;
 	
 	parameter PC_in = 7;
+	parameter LINK_in = 6;
 	
 	reg [2: 0] state, nxt_state;
 		
@@ -238,6 +240,13 @@ module control_unit_fsm
 								default:
 								begin
 									done <= 1'b1;
+								end
+								
+								BL:
+								begin
+									sel <= SEL_PC_REG;
+									A_in <= 1'b0;
+									RX_in[LINK_in] <= 1'b0;
 								end
 							endcase
 						end

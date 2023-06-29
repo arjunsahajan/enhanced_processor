@@ -4,7 +4,7 @@ module enhanced_processor
 	input run,
 	input reset_n,
 	
-	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, SP_out, R6_out, PC_out, G_out, A_out, DOUT_out,
+	output [15: 0] IR_out, R0_out, R1_out, R2_out, R3_out, R4_out, SP_out, LINK_out, PC_out, G_out, A_out, DOUT_out,
 	output [7: 0] ADDR_out,
 	output [2: 0] flag_out,
 	output W_out, W_inp,
@@ -137,14 +137,15 @@ module enhanced_processor
 		.Q(SP_out)
 	);
 	
-	regn #(.N(16)) R6
+	// Link register
+	regn #(.N(16)) LINK
 	(
 		.clk(clk_50MHz),
 		.D(mux_out),
 		.load(RX_in[6]),
 		.clear(reset_n),
 		
-		.Q(R6_out)
+		.Q(LINK_out)
 	);
 	
 	// Program counter
@@ -232,7 +233,7 @@ module enhanced_processor
 		.inp3(R3_out),
 		.inp4(R4_out),
 		.inp5(SP_out),
-		.inp6(R6_out),
+		.inp6(LINK_out),
 		.inp7(PC_out),
 		.inp8(IR_out),
 		.inp9(G_out),
